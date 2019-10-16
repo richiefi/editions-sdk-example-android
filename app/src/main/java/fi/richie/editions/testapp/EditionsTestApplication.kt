@@ -50,8 +50,7 @@ class EditionsTestApplication : Application() {
                 reason: TokenProvider.RequestReason,
                 completion: TokenCompletion
             ) {
-                // TODO add here a valid token
-                completion(null)
+                completion("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbnRpdGxlbWVudHMiOlt7ImFsbF9hY2Nlc3MiOnRydWUsInByb2R1Y3RfdGFnIjoiKiIsInB1Ymxpc2hlcl9zaG9ydF9pZGVudGlmaWVyIjoicmljaGllLWVkaXRpb25zLWV4YW1wbGUifV0sImlkZW50aWZpZXIiOiJyaWNoaWUtZWRpdGlvbnMtZXhhbXBsZSIsImlhdCI6MTU3MTEzMDc1MSwiZXhwIjoyNTE3MjkzODA1fQ.vi609vZUciVbVY5d3sRo5cbDFqudjaBQM_2N1g7cKFQ")
             }
         }
 
