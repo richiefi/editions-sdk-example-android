@@ -1,6 +1,8 @@
 # editions-sdk-example-android
 Richie Editions SDK example app for Android
 
+API reference for the Editions SDK is available at https://developer.richie.fi/android/dokka/editions/fi.richie.editions/index.html
+
 The app just loads a single recycler view with the contents of feed set in the appconfig. Once token access is done, we need to return a valid token in `EditionsTestApplication.kt` -> `TokenProvider`.
 
 Notes:
