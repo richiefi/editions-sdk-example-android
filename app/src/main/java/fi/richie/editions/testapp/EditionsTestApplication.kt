@@ -67,10 +67,5 @@ class EditionsTestApplication : Application() {
             analyticsListener = analyticsListener,
             application = this
         )
-
-        this.editions.initialize { success ->
-            if (!success)
-            Toast.makeText(this, "ERROR LOADING APPCONFIG", LENGTH_LONG).show()
-        }
     }
 }
