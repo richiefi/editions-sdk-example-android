@@ -11,3 +11,4 @@ Notes:
 - A tap downloads an edition and opens it.
 - A long press deletes a downloaded edition.
 - Downloaded edtions show how much disk space they use and are tagged as `downloaded`.
+- If you are using an emulator, please, make sure it is x86_64, x86 is not supported.
