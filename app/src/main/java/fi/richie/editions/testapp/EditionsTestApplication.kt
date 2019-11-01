@@ -24,13 +24,6 @@ class EditionsTestApplication : Application() {
     lateinit var editions: Editions
 
     override fun onCreate() {
-
-        setThreadPolicy(
-            StrictMode.ThreadPolicy.Builder().detectAll()
-                .penaltyLog()
-                .build()
-        )
-
         super.onCreate()
 
         val client = OkHttpClient.Builder()
