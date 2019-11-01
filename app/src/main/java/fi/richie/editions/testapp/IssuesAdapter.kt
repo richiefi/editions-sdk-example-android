@@ -12,7 +12,7 @@ import com.squareup.picasso.Picasso
 import fi.richie.editions.EditionCoverUrlProvider
 import fi.richie.editions.EditionDisplayInfoProvider
 import fi.richie.editions.EditionsDiskUsageProvider
-import fi.richie.richiekit.IntSize
+import fi.richie.common.IntSize
 import java.util.UUID
 
 /**
