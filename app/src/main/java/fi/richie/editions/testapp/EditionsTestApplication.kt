@@ -43,7 +43,11 @@ class EditionsTestApplication : Application() {
                 reason: TokenProvider.RequestReason,
                 completion: TokenCompletion
             ) {
-                completion("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbnRpdGxlbWVudHMiOlt7ImFsbF9hY2Nlc3MiOnRydWUsInByb2R1Y3RfdGFnIjoiKiIsInB1Ymxpc2hlcl9zaG9ydF9pZGVudGlmaWVyIjoicmljaGllLWVkaXRpb25zLWV4YW1wbGUifV0sImlkZW50aWZpZXIiOiJyaWNoaWUtZWRpdGlvbnMtZXhhbXBsZSIsImlhdCI6MTU3MTEzMDc1MSwiZXhwIjoyNTE3MjkzODA1fQ.vi609vZUciVbVY5d3sRo5cbDFqudjaBQM_2N1g7cKFQ")
+                when(reason) {
+                    TokenProvider.RequestReason.NO_TOKEN -> completion("eyJhbGciOiJFUzM4NCIsImtpZCI6Im5JYVJ5d1RXNlg1WndPaXllWFNmeDhnYWVWV1d6Z2g4YkRVbUJSeVRseVUifQ.eyJpc3MiOiJodHRwczovL2FwcGRhdGEucmljaGllLmZpIiwiZW50IjpbImVkaXRpb25zX2RlbW9fY29udGVudCJdLCJleHAiOjE4OTA4ODkyMDAsImlhdCI6MTU3NTI3MDAwMH0.TWFZ6T8PqPwTB5Icv8BjxXiAVeZatoJxxSvTJcd31QXMnE-6m1_0XHELqv5Zr91Hg0XGyElo9HGhG7scTOlf17-40d35HnFn6cLoKrCJhGcrTNrUw1mJ7_W8X6XBeOZS")
+                    TokenProvider.RequestReason.NO_ACCESS -> completion(null)
+                    TokenProvider.RequestReason.NO_ENTITLEMENTS -> completion(null)
+                }
             }
         }
 
