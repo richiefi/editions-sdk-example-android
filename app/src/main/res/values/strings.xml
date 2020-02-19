@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Editions SDK test</string>
-    <string name="initializing">Initializing...</string>
+    <string name="initializing">Initializing…</string>
     <string name="error_init">Error initializing editions</string>
 </resources>
