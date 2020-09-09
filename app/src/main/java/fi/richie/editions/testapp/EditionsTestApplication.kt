@@ -7,11 +7,12 @@ import fi.richie.editions.Editions
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import java.util.Collections
-import android.util.Log
-import fi.richie.common.public.TokenCompletion
-import fi.richie.common.public.TokenProvider
+import fi.richie.common.Log
+import fi.richie.common.shared.TokenCompletion
+import fi.richie.common.shared.TokenProvider
 import fi.richie.editions.AnalyticsEvent
 import fi.richie.editions.AnalyticsListener
+import fi.richie.editions.EditionsConfiguration
 
 /**
  * Created by Luis Ángel San Martín on 2019-08-28.
@@ -21,6 +22,8 @@ class EditionsTestApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        Log.level = Log.Level.VERBOSE
 
         val client = OkHttpClient.Builder()
             .protocols(Collections.singletonList(Protocol.HTTP_1_1))
@@ -36,15 +39,15 @@ class EditionsTestApplication : Application() {
 
         val tokenProvider = object : TokenProvider {
             override val hasToken: Boolean
-                get() = true //true if the user is logged in, false otherwise
+                get() = true
 
             override fun token(
                 reason: TokenProvider.RequestReason,
                 trigger: TokenProvider.TokenRequestTrigger,
                 completion: TokenCompletion
             ) {
-                when(reason) {
-                    is TokenProvider.RequestReason.NoToken -> completion("eyJhbGciOiJFUzM4NCIsImtpZCI6Im5JYVJ5d1RXNlg1WndPaXllWFNmeDhnYWVWV1d6Z2g4YkRVbUJSeVRseVUifQ.eyJpc3MiOiJodHRwczovL2FwcGRhdGEucmljaGllLmZpIiwiZW50IjpbImVkaXRpb25zX2RlbW9fY29udGVudCJdLCJleHAiOjE4OTA4ODkyMDAsImlhdCI6MTU3NTI3MDAwMH0.TWFZ6T8PqPwTB5Icv8BjxXiAVeZatoJxxSvTJcd31QXMnE-6m1_0XHELqv5Zr91Hg0XGyElo9HGhG7scTOlf17-40d35HnFn6cLoKrCJhGcrTNrUw1mJ7_W8X6XBeOZS")
+                when (reason) {
+                    is TokenProvider.RequestReason.NoToken -> completion("eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCIsImtpZCI6InJpY2hpZS1ib29rcy1kZXYifQ.eyJlbnQiOlsiZGV2LWFsbC1hY2Nlc3MiXSwiZXhwIjoxNzE3NDExMjk5LCJpc3MiOiJyaWNoaWUtYm9va3MtZGV2Iiwic3ViIjoicmljaGllLWJvb2tzLWRldiIsImlhdCI6MTU1OTU1ODU2NH0.mC8jbluWgSMa6f0b4fGesZElNr74S36tMAQFPjSyGwINjBNnbf-NG9DXgO6qwyhKk1RgnkpfyiRxkzfrYjkHhgDCPMlcNsA_MvWWdCEehOn3DE5HsvxS2Ev21fotXDXb")
                     is TokenProvider.RequestReason.NoAccess -> completion(null)
                     is TokenProvider.RequestReason.NoEntitlements -> completion(null)
                 }
@@ -53,16 +56,18 @@ class EditionsTestApplication : Application() {
 
         val analyticsListener = object : AnalyticsListener {
             override fun onAnalyticsEvent(event: AnalyticsEvent) {
-                Log.i("INFO", "Event : ${event.name}")
+                Log.info("Event : ${event.name}")
             }
-
         }
+
+        val configuration = EditionsConfiguration(2.0f)
 
         this.editions = Editions(
             appId = "fi.richie.editionsTestApp",
             tokenProvider = tokenProvider,
             analyticsListener = analyticsListener,
-            application = this
+            application = this,
+            configuration = configuration
         )
     }
 }

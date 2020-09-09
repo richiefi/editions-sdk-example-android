@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
+import fi.richie.common.interfaces.Cancelable
 import fi.richie.editions.DownloadProgressListener
 import fi.richie.editions.Editions
 import kotlinx.android.synthetic.main.main_activity.recyclerView
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     var adapter: IssuesAdapter? = null
 
     val progressTracker = HashMap<UUID, IssueViewModel>()
+    val downloads = HashMap<UUID, Cancelable>()
 
     private var latestIssueTapped: UUID? = null
 
@@ -61,7 +63,21 @@ class MainActivity : AppCompatActivity() {
             // if the user explicitly wants to open an already downloaded issue we should always open it
             this.latestIssueTapped = editionId
         } else {
-            downloadIssue(editionId, position)
+            if (this.downloads.containsKey(editionId)) { //cancel
+                this.downloads[editionId]?.cancel()
+                this.downloads.remove(editionId)
+
+                this@MainActivity.progressTracker[editionId] = IssueViewModel(
+                    isDownloading = false,
+                    progressDownload = 0,
+                    isProcessing = false
+                )
+                this@MainActivity.adapter?.refresh(position)
+
+                purgeTracker()
+            } else {
+                downloadIssue(editionId, position)
+            }
         }
     }
 
@@ -83,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             if (openError != null) {
                 Toast.makeText(
                     this@MainActivity,
-                    "Error opening edition",
+                    "Error opening edition ${openError.name}",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -91,7 +107,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun downloadIssue(editionId: UUID, position: Int) {
-        this.editions.editionPresenter.downloadEdition(editionId, object :
+        val download = this.editions.editionPresenter.downloadEdition(editionId, object :
             DownloadProgressListener {
             override fun editionDidFailDownload(editionId: UUID, exception: Exception?) {
                 Toast.makeText(
@@ -106,6 +122,10 @@ class MainActivity : AppCompatActivity() {
                     isProcessing = false
                 )
                 this@MainActivity.adapter?.refresh(position)
+            }
+
+            override fun editionDidFailWithNoEntitlements(editionId: UUID?) {
+
             }
 
             override fun editionWillStartDownload(editionId: UUID) {
@@ -144,9 +164,23 @@ class MainActivity : AppCompatActivity() {
                     this@MainActivity.openIssue(editionId, position)
                 }
 
+                this@MainActivity.downloads.remove(editionId)
+
                 purgeTracker()
             }
         })
+
+
+        if (download != null) {
+            this.downloads[editionId] = download
+
+            this@MainActivity.progressTracker[editionId] = IssueViewModel(
+                isDownloading = true,
+                progressDownload = 0,
+                isProcessing = false
+            )
+            this@MainActivity.adapter?.refresh(position)
+        }
     }
 
     private fun purgeTracker() {
