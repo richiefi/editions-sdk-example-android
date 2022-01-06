@@ -140,7 +140,9 @@ class MainActivity : AppCompatActivity() {
             override fun editionDownloadProgress(
                 editionId: UUID,
                 progress: Float,
-                isBeingPreparedForPresentation: Boolean
+                isBeingPreparedForPresentation: Boolean,
+                downloadedBytes: Long,
+                expectedTotalBytes: Long
             ) {
                 this@MainActivity.progressTracker[editionId] = IssueViewModel(
                     isDownloading = progress < 1,
