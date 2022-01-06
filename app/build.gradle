@@ -58,6 +58,6 @@ dependencies {
 
     api "com.squareup.picasso:picasso:2.71828"
 
-    api "fi.richie:editions:202008.15"
+    api "fi.richie:editions:202110.6"
 
 }
