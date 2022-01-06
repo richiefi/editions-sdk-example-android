@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity() {
                     progressDownload = -1,
                     isProcessing = false
                 )
+                this@MainActivity.downloads.remove(editionId)
                 this@MainActivity.adapter?.refresh(position)
             }
 
