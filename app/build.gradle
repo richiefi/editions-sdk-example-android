@@ -56,7 +56,5 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     api "androidx.multidex:multidex:2.0.1"
 
-    api "com.squareup.picasso:picasso:2.71828"
-
     api "fi.richie:editions:202210.5"
 }
