@@ -1,6 +1,7 @@
 package fi.richie.editions.testapp
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,16 +9,17 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
-import fi.richie.editions.EditionCoverUrlProvider
+import fi.richie.editions.EditionCoverProvider
 import fi.richie.editions.EditionDisplayInfoProvider
 import fi.richie.editions.EditionsDiskUsageProvider
 import fi.richie.common.IntSize
+import fi.richie.common.interfaces.Cancelable
 import java.util.UUID
 
 /**
  * Created by Luis Ángel San Martín on 2019-08-26.
  */
+
 
 data class IssueViewModel(
     val isDownloading: Boolean,
@@ -31,7 +33,7 @@ class IssuesAdapter(
     private var onDeleteIssue: (UUID, position: Int) -> Unit,
     private var editionIsDownloaded: (UUID) -> Boolean,
     private var issueStatusProvider: (UUID) -> IssueViewModel?,
-    private var coverUrlProvider: EditionCoverUrlProvider,
+    private var coverProvider: EditionCoverProvider,
     private var displayInfoProvider: EditionDisplayInfoProvider,
     private var diskUsageProvider: EditionsDiskUsageProvider
 ) : RecyclerView.Adapter<IssueViewHolder>() {
@@ -48,6 +50,7 @@ class IssuesAdapter(
         )
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setEditions(editions: Array<UUID>) {
         this.issues = editions
 
@@ -62,12 +65,17 @@ class IssuesAdapter(
 
         val issueDisplayInfo = this.displayInfoProvider.displayInfoForEdition(issueId) ?: return
 
-        val url = this.coverUrlProvider.coverUrlForEdition(
-            this.issues[position],
-            IntSize(issueDisplayInfo.coverSize.width, issueDisplayInfo.coverSize.height)
-        ).toString()
-
         holder.coverView.setImageDrawable(null)
+
+        holder.coverCancelable?.cancel()
+
+        holder.coverCancelable = this.coverProvider.coverBitmapForEdition(
+            this.issues[position],
+            IntSize(800, 400) //customize this size based on your needs
+        ) { bitmap, _ ->
+            bitmap?.let {
+                holder.coverView.setImageDrawable(BitmapDrawable(holder.coverView.resources, it)) }
+        }
 
         val issueStatus = this.issueStatusProvider(issueId)
 
@@ -83,8 +91,6 @@ class IssuesAdapter(
         } else {
             holder.prepareProgressBar.visibility = View.GONE
         }
-
-        Picasso.get().load(url).fit().centerInside().into(holder.coverView)
 
         holder.title.text = issueDisplayInfo.title
 
@@ -120,5 +126,6 @@ class IssueViewHolder(
     val coverView: ImageView,
     val downloadProgressBar: ProgressBar,
     val prepareProgressBar: ProgressBar,
-    val dowloadedIndicator: TextView
+    val dowloadedIndicator: TextView,
+    var coverCancelable: Cancelable? = null
 ) : RecyclerView.ViewHolder(view)

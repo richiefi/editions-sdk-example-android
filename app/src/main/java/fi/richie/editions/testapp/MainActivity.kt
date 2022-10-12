@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
                 this.editions.downloadedEditionsProvider.downloadedEditions().contains(issue)
             },
             { this.progressTracker[it] },
-            this.editions.editionCoverUrlProvider,
+            this.editions.editionCoverProvider,
             this.editions.editionDisplayInfoProvider,
             this.editions.editionsDiskUsageProvider
         )

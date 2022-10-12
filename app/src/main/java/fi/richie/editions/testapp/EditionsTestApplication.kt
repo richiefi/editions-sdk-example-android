@@ -1,12 +1,7 @@
 package fi.richie.editions.testapp
 
 import android.app.Application
-import com.squareup.picasso.OkHttp3Downloader
-import com.squareup.picasso.Picasso
 import fi.richie.editions.Editions
-import okhttp3.OkHttpClient
-import okhttp3.Protocol
-import java.util.Collections
 import fi.richie.common.Log
 import fi.richie.common.shared.TokenCompletion
 import fi.richie.common.shared.TokenProvider
@@ -24,18 +19,6 @@ class EditionsTestApplication : Application() {
         super.onCreate()
 
         Log.level = Log.Level.VERBOSE
-
-        val client = OkHttpClient.Builder()
-            .protocols(Collections.singletonList(Protocol.HTTP_1_1))
-            .build()
-
-        val picasso = Picasso.Builder(this)
-            .downloader(OkHttp3Downloader(client))
-            .build()
-
-        picasso.isLoggingEnabled = true
-
-        Picasso.setSingletonInstance(picasso)
 
         val tokenProvider = object : TokenProvider {
             override val hasToken: Boolean
