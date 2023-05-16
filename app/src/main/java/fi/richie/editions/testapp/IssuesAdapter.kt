@@ -10,16 +10,15 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import fi.richie.editions.EditionCoverProvider
-import fi.richie.editions.EditionDisplayInfoProvider
 import fi.richie.editions.EditionsDiskUsageProvider
 import fi.richie.common.IntSize
 import fi.richie.common.interfaces.Cancelable
+import fi.richie.editions.Edition
 import java.util.UUID
 
 /**
  * Created by Luis Ángel San Martín on 2019-08-26.
  */
-
 
 data class IssueViewModel(
     val isDownloading: Boolean,
@@ -28,13 +27,12 @@ data class IssueViewModel(
 )
 
 class IssuesAdapter(
-    private var issues: Array<UUID>,
-    private var onIssueSelected: (UUID, position: Int) -> Unit,
-    private var onDeleteIssue: (UUID, position: Int) -> Unit,
-    private var editionIsDownloaded: (UUID) -> Boolean,
-    private var issueStatusProvider: (UUID) -> IssueViewModel?,
+    private var issues: List<Edition>,
+    private var onIssueSelected: (Edition, position: Int) -> Unit,
+    private var onDeleteIssue: (Edition, position: Int) -> Unit,
+    private var editionIsDownloaded: (Edition) -> Boolean,
+    private var issueStatusProvider: (Edition) -> IssueViewModel?,
     private var coverProvider: EditionCoverProvider,
-    private var displayInfoProvider: EditionDisplayInfoProvider,
     private var diskUsageProvider: EditionsDiskUsageProvider
 ) : RecyclerView.Adapter<IssueViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IssueViewHolder {
@@ -51,7 +49,7 @@ class IssuesAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setEditions(editions: Array<UUID>) {
+    fun setEditions(editions: List<Edition>) {
         this.issues = editions
 
         this.notifyDataSetChanged()
@@ -61,9 +59,7 @@ class IssuesAdapter(
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: IssueViewHolder, position: Int) {
-        val issueId = this.issues[position]
-
-        val issueDisplayInfo = this.displayInfoProvider.displayInfoForEdition(issueId) ?: return
+        val edition = this.issues[position]
 
         holder.coverView.setImageDrawable(null)
 
@@ -71,13 +67,13 @@ class IssuesAdapter(
 
         holder.coverCancelable = this.coverProvider.coverBitmapForEdition(
             this.issues[position],
-            IntSize(800, 400) //customize this size based on your needs
+            IntSize(800, 400)
         ) { bitmap, _ ->
             bitmap?.let {
                 holder.coverView.setImageDrawable(BitmapDrawable(holder.coverView.resources, it)) }
         }
 
-        val issueStatus = this.issueStatusProvider(issueId)
+        val issueStatus = this.issueStatusProvider(edition)
 
         if (issueStatus?.isDownloading == true) {
             holder.downloadProgressBar.visibility = View.VISIBLE
@@ -92,21 +88,21 @@ class IssuesAdapter(
             holder.prepareProgressBar.visibility = View.GONE
         }
 
-        holder.title.text = issueDisplayInfo.title
+        holder.title.text = edition.title
 
         holder.view.setOnClickListener {
-            this.onIssueSelected(issueId, position)
+            this.onIssueSelected(edition, position)
         }
 
         holder.view.setOnLongClickListener {
-            this.onDeleteIssue(issueId, position)
+            this.onDeleteIssue(edition, position)
 
             true
         }
 
-        if (this.editionIsDownloaded(issueId)) {
+        if (this.editionIsDownloaded(edition)) {
             holder.dowloadedIndicator.visibility = View.VISIBLE
-            this.diskUsageProvider.diskUsageByDownloadedEdition(issueId) { size ->
+            this.diskUsageProvider.diskUsageByDownloadedEdition(edition.id) { size ->
                 val spaceOnDisk = size / 1024 / 1024
                 holder.dowloadedIndicator.text = "downloaded - ${spaceOnDisk}MB"
             }

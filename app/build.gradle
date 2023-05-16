@@ -1,15 +1,13 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
 
-apply plugin: 'kotlin-android-extensions'
-
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
+
     defaultConfig {
         applicationId "fi.richie.editions.editionstestapp"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -28,33 +26,25 @@ android {
         }
     }
 
-    lintOptions {
-        warningsAsErrors true
-        checkAllWarnings true
-        disable 'InvalidPackage',
-                'GradleDependency',
-                'SyntheticAccessor',
-                'MissingRegistered',
-                'UnusedResources', // this is disabled due to the notification icon override. enable now and then to check this
-                'UnusedIds',
-                'IconExpectedSize',
-                'Autofill',
-                'NegativeMargin',
-                'IconDuplicates'
+    buildFeatures {
+        viewBinding true
     }
+
+    namespace 'fi.richie.editions.testapp'
+
+    lint {
+        checkAllWarnings true
+        warningsAsErrors true
+    }
+
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.core:core-ktx:1.0.2'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    api "androidx.multidex:multidex:2.0.1"
-
-    api "fi.richie:editions:202210.5"
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'fi.richie:editions:202305.33'
 }

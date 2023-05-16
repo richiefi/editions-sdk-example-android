@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import fi.richie.editions.Editions
-import kotlinx.android.synthetic.main.launch_activity.*
+import fi.richie.editions.testapp.databinding.LaunchActivityBinding
 
 /**
  * Created by Luis Ángel San Martín on 2019-10-24.
@@ -17,7 +17,9 @@ class LaunchActivity : AppCompatActivity() {
 
         this.editions = (this.application as EditionsTestApplication).editions
 
-        setContentView(R.layout.launch_activity)
+        val binding = LaunchActivityBinding.inflate(this.layoutInflater)
+
+        setContentView(binding.root)
 
         this.editions.initialize { success ->
             if (success) {
@@ -25,7 +27,7 @@ class LaunchActivity : AppCompatActivity() {
                 startActivity(intent)
                 finish()
             } else {
-                notification_text.text = getString(R.string.error_init)
+                binding.notificationText.text = getString(R.string.error_init)
             }
         }
     }
