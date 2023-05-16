@@ -1,7 +1,12 @@
 package fi.richie.editions.testapp
 
 import android.app.Application
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import fi.richie.editions.Editions
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import java.util.Collections
 import fi.richie.common.Log
 import fi.richie.common.shared.TokenCompletion
 import fi.richie.common.shared.TokenProvider
@@ -20,6 +25,18 @@ class EditionsTestApplication : Application() {
 
         Log.level = Log.Level.VERBOSE
 
+        val client = OkHttpClient.Builder()
+            .protocols(Collections.singletonList(Protocol.HTTP_1_1))
+            .build()
+
+        val picasso = Picasso.Builder(this)
+            .downloader(OkHttp3Downloader(client))
+            .build()
+
+        picasso.isLoggingEnabled = true
+
+        Picasso.setSingletonInstance(picasso)
+
         val tokenProvider = object : TokenProvider {
             override val hasToken: Boolean
                 get() = true
@@ -29,11 +46,7 @@ class EditionsTestApplication : Application() {
                 trigger: TokenProvider.TokenRequestTrigger,
                 completion: TokenCompletion
             ) {
-                when (reason) {
-                    is TokenProvider.RequestReason.NoToken -> completion("eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCIsImtpZCI6InJpY2hpZS1ib29rcy1kZXYifQ.eyJlbnQiOlsiZGV2LWFsbC1hY2Nlc3MiXSwiZXhwIjoxNzE3NDExMjk5LCJpc3MiOiJyaWNoaWUtYm9va3MtZGV2Iiwic3ViIjoicmljaGllLWJvb2tzLWRldiIsImlhdCI6MTU1OTU1ODU2NH0.mC8jbluWgSMa6f0b4fGesZElNr74S36tMAQFPjSyGwINjBNnbf-NG9DXgO6qwyhKk1RgnkpfyiRxkzfrYjkHhgDCPMlcNsA_MvWWdCEehOn3DE5HsvxS2Ev21fotXDXb")
-                    is TokenProvider.RequestReason.NoAccess -> completion(null)
-                    is TokenProvider.RequestReason.NoEntitlements -> completion(null)
-                }
+                completion("eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCIsImtpZCI6InJpY2hpZS1ib29rcy1kZXYifQ.eyJlbnQiOlsiZGV2LWFsbC1hY2Nlc3MiXSwiZXhwIjoxNzE3NDExMjk5LCJpc3MiOiJyaWNoaWUtYm9va3MtZGV2Iiwic3ViIjoicmljaGllLWJvb2tzLWRldiIsImlhdCI6MTU1OTU1ODU2NH0.mC8jbluWgSMa6f0b4fGesZElNr74S36tMAQFPjSyGwINjBNnbf-NG9DXgO6qwyhKk1RgnkpfyiRxkzfrYjkHhgDCPMlcNsA_MvWWdCEehOn3DE5HsvxS2Ev21fotXDXb")
             }
         }
 

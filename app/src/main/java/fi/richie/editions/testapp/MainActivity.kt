@@ -6,8 +6,9 @@ import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import fi.richie.common.interfaces.Cancelable
 import fi.richie.editions.DownloadProgressListener
+import fi.richie.editions.Edition
 import fi.richie.editions.Editions
-import kotlinx.android.synthetic.main.main_activity.recyclerView
+import fi.richie.editions.testapp.databinding.MainActivityBinding
 import java.util.UUID
 import kotlin.collections.HashMap
 
@@ -16,58 +17,76 @@ class MainActivity : AppCompatActivity() {
 
     var adapter: IssuesAdapter? = null
 
-    val progressTracker = HashMap<UUID, IssueViewModel>()
-    val downloads = HashMap<UUID, Cancelable>()
+    val progressTracker = HashMap<Edition, IssueViewModel>()
+    val downloads = HashMap<Edition, Cancelable>()
 
-    private var latestIssueTapped: UUID? = null
+    private var latestIssueTapped: Edition? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         this.editions = (this.application as EditionsTestApplication).editions
 
-        setContentView(R.layout.main_activity)
+        val binding = MainActivityBinding.inflate(this.layoutInflater)
 
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        setContentView(binding.root)
+
+        binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
 
         this.adapter = IssuesAdapter(
-            emptyArray(),
-            { issue, position -> onIssueSelected(issue, position) },
-            { issue, position -> onDeleteIssue(issue, position) },
-            { issue ->
-                this.editions.downloadedEditionsProvider.downloadedEditions().contains(issue)
+            emptyList(),
+            { edition, position -> onEditionSelected(edition, position) },
+            { edition, position -> onDeleteEdition(edition, position) },
+            { edition ->
+                this.editions.downloadedEditionsProvider.downloadedEditions().map { it.id }.contains(edition.id)
             },
             { this.progressTracker[it] },
             this.editions.editionCoverProvider,
-            this.editions.editionDisplayInfoProvider,
             this.editions.editionsDiskUsageProvider
         )
 
-        recyclerView.adapter = this.adapter
+        binding.recyclerView.adapter = this.adapter
 
-        this.editions.editionProvider.allEditions { editions ->
-            this.adapter?.setEditions(editions)
-        }
+        // you can query the available editions before updating
+        this.editions.editionProvider.editions().next { result ->
+            if (result.isFailure) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Error getting editions at launch",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
 
-        this.editions.updateFeed {
-            this.editions.editionProvider.allEditions { editions ->
+            result.getOrNull()?.let { page ->
+                val editions = page.editions
                 this.adapter?.setEditions(editions)
+
+                // call update, and then update the content again
+                this.editions.updateFeed {
+                    this.editions.editionProvider.editions().next { result ->
+                        result.getOrNull()?.let { page ->
+                            val newEditions = page.editions
+                            this.adapter?.setEditions(newEditions)
+                        }
+                    }
+                }
             }
         }
+
     }
 
-    private fun onIssueSelected(editionId: UUID, position: Int) {
-        if (this.editions.downloadedEditionsProvider.downloadedEditions().contains(editionId)) {
-            openIssue(editionId, position)
+    private fun onEditionSelected(edition: Edition, position: Int) {
+        if (this.editions.downloadedEditionsProvider.downloadedEditions().map { it.id }.contains(edition.id)) {
+            openEdition(edition, position)
 
             // if the user explicitly wants to open an already downloaded issue we should always open it
-            this.latestIssueTapped = editionId
+            this.latestIssueTapped = edition
         } else {
-            if (this.downloads.containsKey(editionId)) { //cancel
-                this.downloads[editionId]?.cancel()
-                this.downloads.remove(editionId)
+            if (this.downloads.containsKey(edition)) { //cancel
+                this.downloads[edition]?.cancel()
+                this.downloads.remove(edition)
 
-                this@MainActivity.progressTracker[editionId] = IssueViewModel(
+                this@MainActivity.progressTracker[edition] = IssueViewModel(
                     isDownloading = false,
                     progressDownload = 0,
                     isProcessing = false
@@ -76,22 +95,22 @@ class MainActivity : AppCompatActivity() {
 
                 purgeTracker()
             } else {
-                downloadIssue(editionId, position)
+                downloadEdition(edition, position)
             }
         }
     }
 
-    private fun onDeleteIssue(editionId: UUID, position: Int) {
-        if (this.editions.downloadedEditionsProvider.downloadedEditions().contains(editionId)) {
-            this.editions.downloadedEditionsManager.deleteEdition(editionId, completion = {
+    private fun onDeleteEdition(edition: Edition, position: Int) {
+        if (this.editions.downloadedEditionsProvider.downloadedEditions().map { it.id }.contains(edition.id)) {
+            this.editions.downloadedEditionsManager.deleteEdition(edition.id, completion = {
                 this@MainActivity.adapter?.refresh(position)
             })
         }
     }
 
-    private fun openIssue(editionId: UUID, position: Int) {
-        this.editions.editionPresenter.openEdition(editionId, this) { openError ->
-            this@MainActivity.progressTracker.remove(editionId)
+    private fun openEdition(edition: Edition, position: Int) {
+        this.editions.editionPresenter.openEdition(edition, this) { openError ->
+            this@MainActivity.progressTracker.remove(edition)
             this@MainActivity.adapter?.refresh(position)
 
             purgeTracker()
@@ -106,31 +125,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun downloadIssue(editionId: UUID, position: Int) {
-        val download = this.editions.editionPresenter.downloadEdition(editionId, object :
+    private fun downloadEdition(edition: Edition, position: Int) {
+        val download = this.editions.editionPresenter.downloadEdition(edition, object :
             DownloadProgressListener {
-            override fun editionDidFailDownload(editionId: UUID, exception: Exception?) {
+            override fun editionDidFailDownload(edition: Edition, exception: Exception?) {
                 Toast.makeText(
                     this@MainActivity,
                     exception?.message ?: "unknown error downloading issue",
                     Toast.LENGTH_LONG
                 ).show()
 
-                this@MainActivity.progressTracker[editionId] = IssueViewModel(
+                this@MainActivity.progressTracker[edition] = IssueViewModel(
                     isDownloading = false,
                     progressDownload = -1,
                     isProcessing = false
                 )
-                this@MainActivity.downloads.remove(editionId)
+                this@MainActivity.downloads.remove(edition)
                 this@MainActivity.adapter?.refresh(position)
             }
 
-            override fun editionDidFailWithNoEntitlements(editionId: UUID?) {
+            override fun editionDidFailWithNoEntitlements(edition: Edition?) {
 
             }
 
-            override fun editionWillStartDownload(editionId: UUID) {
-                this@MainActivity.progressTracker[editionId] = IssueViewModel(
+            override fun editionWillStartDownload(edition: Edition) {
+                this@MainActivity.progressTracker[edition] = IssueViewModel(
                     isDownloading = true,
                     progressDownload = 0,
                     isProcessing = false
@@ -139,13 +158,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun editionDownloadProgress(
-                editionId: UUID,
+                edition: Edition,
                 progress: Float,
                 isBeingPreparedForPresentation: Boolean,
                 downloadedBytes: Long,
                 expectedTotalBytes: Long
             ) {
-                this@MainActivity.progressTracker[editionId] = IssueViewModel(
+                this@MainActivity.progressTracker[edition] = IssueViewModel(
                     isDownloading = progress < 1,
                     progressDownload = (progress * 100).toInt(),
                     isProcessing = isBeingPreparedForPresentation
@@ -153,8 +172,8 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.adapter?.refresh(position)
             }
 
-            override fun editionDidDownload(editionId: UUID) {
-                this@MainActivity.progressTracker[editionId] = IssueViewModel(
+            override fun editionDidDownload(edition: Edition) {
+                this@MainActivity.progressTracker[edition] = IssueViewModel(
                     isDownloading = false,
                     progressDownload = -1,
                     isProcessing = false
@@ -164,10 +183,10 @@ class MainActivity : AppCompatActivity() {
                 val numOfItemsBeingDownloaded = this@MainActivity.progressTracker.size
 
                 if (numOfItemsBeingDownloaded == 1) {
-                    this@MainActivity.openIssue(editionId, position)
+                    this@MainActivity.openEdition(edition, position)
                 }
 
-                this@MainActivity.downloads.remove(editionId)
+                this@MainActivity.downloads.remove(edition)
 
                 purgeTracker()
             }
@@ -175,9 +194,9 @@ class MainActivity : AppCompatActivity() {
 
 
         if (download != null) {
-            this.downloads[editionId] = download
+            this.downloads[edition] = download
 
-            this@MainActivity.progressTracker[editionId] = IssueViewModel(
+            this@MainActivity.progressTracker[edition] = IssueViewModel(
                 isDownloading = true,
                 progressDownload = 0,
                 isProcessing = false
