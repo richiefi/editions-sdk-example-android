@@ -144,6 +144,7 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.adapter?.refresh(position)
             }
 
+            @Deprecated("Use editionDidFailDownload instead.")
             override fun editionDidFailWithNoEntitlements(edition: Edition?) {
 
             }
