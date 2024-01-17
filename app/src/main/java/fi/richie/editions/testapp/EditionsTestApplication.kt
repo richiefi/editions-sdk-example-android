@@ -54,6 +54,7 @@ class EditionsTestApplication : Application() {
             override fun onAnalyticsEvent(event: AnalyticsEvent) {
                 Log.info("Event : ${event.name}")
             }
+
         }
 
         val configuration = EditionsConfiguration(2.0f)

@@ -1,16 +1,14 @@
 package fi.richie.editions.testapp
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import fi.richie.common.interfaces.Cancelable
 import fi.richie.editions.DownloadProgressListener
 import fi.richie.editions.Edition
 import fi.richie.editions.Editions
 import fi.richie.editions.testapp.databinding.MainActivityBinding
-import java.util.UUID
-import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
     private lateinit var editions: Editions
@@ -128,7 +126,7 @@ class MainActivity : AppCompatActivity() {
     private fun downloadEdition(edition: Edition, position: Int) {
         val download = this.editions.editionPresenter.downloadEdition(edition, object :
             DownloadProgressListener {
-            override fun editionDidFailDownload(edition: Edition, exception: Exception?) {
+            override fun editionDidFailDownload(edition: Edition, exception: Throwable?) {
                 Toast.makeText(
                     this@MainActivity,
                     exception?.message ?: "unknown error downloading issue",

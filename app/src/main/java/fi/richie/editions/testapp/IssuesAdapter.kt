@@ -9,12 +9,11 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import fi.richie.editions.EditionCoverProvider
+import fi.richie.editions.EditionCoverBitmapProvider
 import fi.richie.editions.EditionsDiskUsageProvider
 import fi.richie.common.IntSize
 import fi.richie.common.interfaces.Cancelable
 import fi.richie.editions.Edition
-import java.util.UUID
 
 /**
  * Created by Luis Ángel San Martín on 2019-08-26.
@@ -32,7 +31,7 @@ class IssuesAdapter(
     private var onDeleteIssue: (Edition, position: Int) -> Unit,
     private var editionIsDownloaded: (Edition) -> Boolean,
     private var issueStatusProvider: (Edition) -> IssueViewModel?,
-    private var coverProvider: EditionCoverProvider,
+    private var coverProvider: EditionCoverBitmapProvider,
     private var diskUsageProvider: EditionsDiskUsageProvider
 ) : RecyclerView.Adapter<IssueViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IssueViewHolder {
