@@ -3,6 +3,9 @@ package fi.richie.editions.testapp
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import fi.richie.common.coroutines.launchWithOuterScope
+import fi.richie.common.tryCatch
 import fi.richie.editions.Editions
 import fi.richie.editions.testapp.databinding.LaunchActivityBinding
 
@@ -15,14 +18,17 @@ class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.editions = (this.application as EditionsTestApplication).editions
+        this.lifecycleScope.launchWithOuterScope {
+            val editions =
+                tryCatch { (this.application as EditionsTestApplication).editions.await() }
 
-        val binding = LaunchActivityBinding.inflate(this.layoutInflater)
+            val binding = LaunchActivityBinding.inflate(this.layoutInflater)
 
-        setContentView(binding.root)
+            setContentView(binding.root)
 
-        this.editions.initialize { success ->
-            if (success) {
+            if (editions != null) {
+                this.editions = editions
+
                 val intent = Intent(this@LaunchActivity, MainActivity::class.java)
                 startActivity(intent)
                 finish()
