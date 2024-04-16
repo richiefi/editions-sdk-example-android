@@ -3,12 +3,15 @@ package fi.richie.editions.testapp
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import fi.richie.common.coroutines.launchWithOuterScope
 import fi.richie.common.interfaces.Cancelable
 import fi.richie.editions.DownloadProgressListener
 import fi.richie.editions.Edition
 import fi.richie.editions.Editions
 import fi.richie.editions.testapp.databinding.MainActivityBinding
+import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
     private lateinit var editions: Editions
@@ -23,7 +26,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.editions = (this.application as EditionsTestApplication).editions
+        init()
+    }
+
+    private fun init() = this.lifecycleScope.launchWithOuterScope {
+        this.editions = (this.application as EditionsTestApplication).editions.await()
 
         val binding = MainActivityBinding.inflate(this.layoutInflater)
 
@@ -46,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = this.adapter
 
         // you can query the available editions before updating
-        this.editions.editionProvider.editions().next { result ->
+        this.editions.editionProvider?.editions()?.next { result ->
             if (result.isFailure) {
                 Toast.makeText(
                     this@MainActivity,
@@ -61,7 +68,7 @@ class MainActivity : AppCompatActivity() {
 
                 // call update, and then update the content again
                 this.editions.updateFeed {
-                    this.editions.editionProvider.editions().next { result ->
+                    this.editions.editionProvider?.editions()?.next { result ->
                         result.getOrNull()?.let { page ->
                             val newEditions = page.editions
                             this.adapter?.setEditions(newEditions)
