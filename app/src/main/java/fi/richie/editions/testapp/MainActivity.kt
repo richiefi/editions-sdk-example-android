@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             },
             { this.progressTracker[it] },
             this.editions.editionCoverProvider,
-            this.editions.editionsDiskUsageProvider
+            this.editions.editionsDiskUsageProvider,
         )
 
         binding.recyclerView.adapter = this.adapter
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(
                     this@MainActivity,
                     "Error getting editions at launch",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
             }
 
@@ -77,7 +77,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
 
     private fun onEditionSelected(edition: Edition, position: Int) {
@@ -87,14 +86,14 @@ class MainActivity : AppCompatActivity() {
             // if the user explicitly wants to open an already downloaded issue we should always open it
             this.latestIssueTapped = edition
         } else {
-            if (this.downloads.containsKey(edition)) { //cancel
+            if (this.downloads.containsKey(edition)) { // cancel
                 this.downloads[edition]?.cancel()
                 this.downloads.remove(edition)
 
                 this@MainActivity.progressTracker[edition] = IssueViewModel(
                     isDownloading = false,
                     progressDownload = 0,
-                    isProcessing = false
+                    isProcessing = false,
                 )
                 this@MainActivity.adapter?.refresh(position)
 
@@ -124,80 +123,81 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(
                     this@MainActivity,
                     "Error opening edition ${openError.name}",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
             }
         }
     }
 
     private fun downloadEdition(edition: Edition, position: Int) {
-        val download = this.editions.editionPresenter.downloadEdition(edition, object :
-            DownloadProgressListener {
-            override fun editionDidFailDownload(edition: Edition, exception: Throwable?) {
-                Toast.makeText(
-                    this@MainActivity,
-                    exception?.message ?: "unknown error downloading issue",
-                    Toast.LENGTH_LONG
-                ).show()
+        val download = this.editions.editionPresenter.downloadEdition(
+            edition,
+            object :
+                DownloadProgressListener {
+                override fun editionDidFailDownload(edition: Edition, exception: Throwable?) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        exception?.message ?: "unknown error downloading issue",
+                        Toast.LENGTH_LONG,
+                    ).show()
 
-                this@MainActivity.progressTracker[edition] = IssueViewModel(
-                    isDownloading = false,
-                    progressDownload = -1,
-                    isProcessing = false
-                )
-                this@MainActivity.downloads.remove(edition)
-                this@MainActivity.adapter?.refresh(position)
-            }
-
-            @Deprecated("Use editionDidFailDownload instead.")
-            override fun editionDidFailWithNoEntitlements(edition: Edition?) {
-
-            }
-
-            override fun editionWillStartDownload(edition: Edition) {
-                this@MainActivity.progressTracker[edition] = IssueViewModel(
-                    isDownloading = true,
-                    progressDownload = 0,
-                    isProcessing = false
-                )
-                this@MainActivity.adapter?.refresh(position)
-            }
-
-            override fun editionDownloadProgress(
-                edition: Edition,
-                progress: Float,
-                isBeingPreparedForPresentation: Boolean,
-                downloadedBytes: Long,
-                expectedTotalBytes: Long
-            ) {
-                this@MainActivity.progressTracker[edition] = IssueViewModel(
-                    isDownloading = progress < 1,
-                    progressDownload = (progress * 100).toInt(),
-                    isProcessing = isBeingPreparedForPresentation
-                )
-                this@MainActivity.adapter?.refresh(position)
-            }
-
-            override fun editionDidDownload(edition: Edition) {
-                this@MainActivity.progressTracker[edition] = IssueViewModel(
-                    isDownloading = false,
-                    progressDownload = -1,
-                    isProcessing = false
-                )
-                this@MainActivity.adapter?.refresh(position)
-
-                val numOfItemsBeingDownloaded = this@MainActivity.progressTracker.size
-
-                if (numOfItemsBeingDownloaded == 1) {
-                    this@MainActivity.openEdition(edition, position)
+                    this@MainActivity.progressTracker[edition] = IssueViewModel(
+                        isDownloading = false,
+                        progressDownload = -1,
+                        isProcessing = false,
+                    )
+                    this@MainActivity.downloads.remove(edition)
+                    this@MainActivity.adapter?.refresh(position)
                 }
 
-                this@MainActivity.downloads.remove(edition)
+                @Deprecated("Use editionDidFailDownload instead.")
+                override fun editionDidFailWithNoEntitlements(edition: Edition?) {
+                }
 
-                purgeTracker()
-            }
-        })
+                override fun editionWillStartDownload(edition: Edition) {
+                    this@MainActivity.progressTracker[edition] = IssueViewModel(
+                        isDownloading = true,
+                        progressDownload = 0,
+                        isProcessing = false,
+                    )
+                    this@MainActivity.adapter?.refresh(position)
+                }
 
+                override fun editionDownloadProgress(
+                    edition: Edition,
+                    progress: Float,
+                    isBeingPreparedForPresentation: Boolean,
+                    downloadedBytes: Long,
+                    expectedTotalBytes: Long,
+                ) {
+                    this@MainActivity.progressTracker[edition] = IssueViewModel(
+                        isDownloading = progress < 1,
+                        progressDownload = (progress * 100).toInt(),
+                        isProcessing = isBeingPreparedForPresentation,
+                    )
+                    this@MainActivity.adapter?.refresh(position)
+                }
+
+                override fun editionDidDownload(edition: Edition) {
+                    this@MainActivity.progressTracker[edition] = IssueViewModel(
+                        isDownloading = false,
+                        progressDownload = -1,
+                        isProcessing = false,
+                    )
+                    this@MainActivity.adapter?.refresh(position)
+
+                    val numOfItemsBeingDownloaded = this@MainActivity.progressTracker.size
+
+                    if (numOfItemsBeingDownloaded == 1) {
+                        this@MainActivity.openEdition(edition, position)
+                    }
+
+                    this@MainActivity.downloads.remove(edition)
+
+                    purgeTracker()
+                }
+            },
+        )
 
         if (download != null) {
             this.downloads[edition] = download
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
             this@MainActivity.progressTracker[edition] = IssueViewModel(
                 isDownloading = true,
                 progressDownload = 0,
-                isProcessing = false
+                isProcessing = false,
             )
             this@MainActivity.adapter?.refresh(position)
         }

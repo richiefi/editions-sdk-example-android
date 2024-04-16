@@ -9,11 +9,11 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import fi.richie.editions.EditionCoverBitmapProvider
-import fi.richie.editions.EditionsDiskUsageProvider
 import fi.richie.common.IntSize
 import fi.richie.common.interfaces.Cancelable
 import fi.richie.editions.Edition
+import fi.richie.editions.EditionCoverBitmapProvider
+import fi.richie.editions.EditionsDiskUsageProvider
 
 /**
  * Created by Luis Ángel San Martín on 2019-08-26.
@@ -22,7 +22,7 @@ import fi.richie.editions.Edition
 data class IssueViewModel(
     val isDownloading: Boolean,
     val progressDownload: Int,
-    val isProcessing: Boolean
+    val isProcessing: Boolean,
 )
 
 class IssuesAdapter(
@@ -32,7 +32,7 @@ class IssuesAdapter(
     private var editionIsDownloaded: (Edition) -> Boolean,
     private var issueStatusProvider: (Edition) -> IssueViewModel?,
     private var coverProvider: EditionCoverBitmapProvider,
-    private var diskUsageProvider: EditionsDiskUsageProvider
+    private var diskUsageProvider: EditionsDiskUsageProvider,
 ) : RecyclerView.Adapter<IssueViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IssueViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.issue, parent, false)
@@ -43,7 +43,7 @@ class IssuesAdapter(
             view.findViewById(R.id.coverImageView),
             view.findViewById(R.id.downloadingProgressBar),
             view.findViewById(R.id.preparingProgressBar),
-            view.findViewById(R.id.downloadedIndicator)
+            view.findViewById(R.id.downloadedIndicator),
         )
     }
 
@@ -66,10 +66,11 @@ class IssuesAdapter(
 
         holder.coverCancelable = this.coverProvider.coverBitmapForEdition(
             this.issues[position],
-            IntSize(800, 400)
+            IntSize(800, 400),
         ) { bitmap, _ ->
             bitmap?.let {
-                holder.coverView.setImageDrawable(BitmapDrawable(holder.coverView.resources, it)) }
+                holder.coverView.setImageDrawable(BitmapDrawable(holder.coverView.resources, it))
+            }
         }
 
         val issueStatus = this.issueStatusProvider(edition)
@@ -122,5 +123,5 @@ class IssueViewHolder(
     val downloadProgressBar: ProgressBar,
     val prepareProgressBar: ProgressBar,
     val dowloadedIndicator: TextView,
-    var coverCancelable: Cancelable? = null
+    var coverCancelable: Cancelable? = null,
 ) : RecyclerView.ViewHolder(view)
