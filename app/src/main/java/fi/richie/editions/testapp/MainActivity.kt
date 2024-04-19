@@ -1,6 +1,8 @@
 package fi.richie.editions.testapp
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -27,6 +29,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         init()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        this.menuInflater.inflate(R.menu.top_bar_menu, menu)
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.refresh_button -> refresh()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     private fun init() = this.lifecycleScope.launchWithOuterScope {
@@ -67,13 +83,17 @@ class MainActivity : AppCompatActivity() {
                 this.adapter?.setEditions(editions)
 
                 // call update, and then update the content again
-                this.editions.updateFeed {
-                    this.editions.editionProvider?.editions()?.next { result ->
-                        result.getOrNull()?.let { page ->
-                            val newEditions = page.editions
-                            this.adapter?.setEditions(newEditions)
-                        }
-                    }
+                refresh()
+            }
+        }
+    }
+
+    private fun refresh() {
+        this.editions.updateFeed {
+            this.editions.editionProvider?.editions()?.next { result ->
+                result.getOrNull()?.let { page ->
+                    val newEditions = page.editions
+                    this.adapter?.setEditions(newEditions)
                 }
             }
         }
@@ -131,9 +151,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun downloadEdition(edition: Edition, position: Int) {
         val download = this.editions.editionPresenter.downloadEdition(
-            edition,
-            object :
-                DownloadProgressListener {
+            edition = edition,
+            downloadProgressListener = object : DownloadProgressListener {
                 override fun editionDidFailDownload(edition: Edition, exception: Throwable?) {
                     Toast.makeText(
                         this@MainActivity,
@@ -195,6 +214,10 @@ class MainActivity : AppCompatActivity() {
                     this@MainActivity.downloads.remove(edition)
 
                     purgeTracker()
+                }
+
+                override fun editionDownloadCanceled(edition: Edition) {
+                    this@MainActivity.downloads.remove(edition)
                 }
             },
         )

@@ -5,8 +5,6 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import fi.richie.Richie
 import fi.richie.common.Log
-import fi.richie.common.Scopes
-import fi.richie.common.coroutines.launchWithOuterScope
 import fi.richie.common.shared.TokenCompletion
 import fi.richie.common.shared.TokenProvider
 import fi.richie.editions.AnalyticsEvent
