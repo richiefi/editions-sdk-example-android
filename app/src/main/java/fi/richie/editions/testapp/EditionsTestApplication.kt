@@ -50,7 +50,7 @@ class EditionsTestApplication : Application() {
                 trigger: TokenProvider.TokenRequestTrigger,
                 completion: TokenCompletion,
             ) {
-                completion("eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCIsImtpZCI6InJpY2hpZS1ib29rcy1kZXYifQ.eyJlbnQiOlsiZGV2LWFsbC1hY2Nlc3MiXSwiZXhwIjoxNzE3NDExMjk5LCJpc3MiOiJyaWNoaWUtYm9va3MtZGV2Iiwic3ViIjoicmljaGllLWJvb2tzLWRldiIsImlhdCI6MTU1OTU1ODU2NH0.mC8jbluWgSMa6f0b4fGesZElNr74S36tMAQFPjSyGwINjBNnbf-NG9DXgO6qwyhKk1RgnkpfyiRxkzfrYjkHhgDCPMlcNsA_MvWWdCEehOn3DE5HsvxS2Ev21fotXDXb")
+                completion("eyJhbGciOiJFUzM4NCIsImtpZCI6Im5JYVJ5d1RXNlg1WndPaXllWFNmeDhnYWVWV1d6Z2g4YkRVbUJSeVRseVUifQ.eyJlbnQiOlsiZWRpdGlvbnNfZGVtb19jb250ZW50Il0sImV4cCI6MTkyMTQ3NDgwMCwiaWF0IjoxNzAwNTUwMDAwfQ.zIoJ1htS-xpnHsOR_8ju-gVp9iNmY63424xly4fDaWgtsagoosf2vNW7DDY0gnIV_cJT8SnU0F5GrCO_CVPYT6omsG5qV4KwaGuZrL72j-g_KvO48MYmHlH8OV7oEK3w")
             }
         }
 
