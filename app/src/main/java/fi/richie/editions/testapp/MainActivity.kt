@@ -55,15 +55,15 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
 
         this.adapter = IssuesAdapter(
-            emptyList(),
-            { edition, position -> onEditionSelected(edition, position) },
-            { edition, position -> onDeleteEdition(edition, position) },
-            { edition ->
-                this.editions.downloadedEditionsProvider.downloadedEditions().map { it.id }.contains(edition.id)
+            issues = emptyList(),
+            onIssueSelected = { edition, position -> onEditionSelected(edition, position) },
+            onDeleteIssue = { edition, position -> onDeleteEdition(edition, position) },
+            editionIsDownloaded = { edition ->
+                this.editions.downloadedEditionsProvider.isEditionDownloaded(edition.id)
             },
-            { this.progressTracker[it] },
-            this.editions.editionCoverProvider,
-            this.editions.editionsDiskUsageProvider,
+            issueStatusProvider = { this.progressTracker[it] },
+            coverProvider = this.editions.editionCoverProvider,
+            diskUsageProvider = this.editions.editionsDiskUsageProvider,
         )
 
         binding.recyclerView.adapter = this.adapter
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onEditionSelected(edition: Edition, position: Int) {
-        if (this.editions.downloadedEditionsProvider.downloadedEditions().map { it.id }.contains(edition.id)) {
+        if (this.editions.downloadedEditionsProvider.isEditionDownloaded(edition.id)) {
             openEdition(edition, position)
 
             // if the user explicitly wants to open an already downloaded issue we should always open it
@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onDeleteEdition(edition: Edition, position: Int) {
-        if (this.editions.downloadedEditionsProvider.downloadedEditions().map { it.id }.contains(edition.id)) {
+        if (this.editions.downloadedEditionsProvider.isEditionDownloaded(edition.id)) {
             this.editions.downloadedEditionsManager.deleteEdition(edition.id, completion = {
                 this@MainActivity.adapter?.refresh(position)
             })
@@ -167,10 +167,6 @@ class MainActivity : AppCompatActivity() {
                     )
                     this@MainActivity.downloads.remove(edition)
                     this@MainActivity.adapter?.refresh(position)
-                }
-
-                @Deprecated("Use editionDidFailDownload instead.")
-                override fun editionDidFailWithNoEntitlements(edition: Edition?) {
                 }
 
                 override fun editionWillStartDownload(edition: Edition) {
