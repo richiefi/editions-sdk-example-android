@@ -48,7 +48,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation('fi.richie:richiesdk:202501.17') {
+    implementation('fi.richie:richiesdk:202503.26') {
         exclude group: 'fi.richie', module: 'booklibraryui'
     }
 }
