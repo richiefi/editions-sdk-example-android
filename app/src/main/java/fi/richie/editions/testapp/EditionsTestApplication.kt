@@ -6,6 +6,7 @@ import com.squareup.picasso.Picasso
 import fi.richie.Richie
 import fi.richie.common.Log
 import fi.richie.common.StorageOption
+import fi.richie.common.shared.OpenLinkDelegate
 import fi.richie.common.shared.TokenCompletion
 import fi.richie.common.shared.TokenProvider
 import fi.richie.editions.AnalyticsEvent
@@ -66,6 +67,17 @@ class EditionsTestApplication : Application() {
         Richie.start("fi.richie.editionsTestApp", this)
         Richie.editions(tokenProvider, analyticsListener, configuration) { editions ->
             if (editions != null) {
+                // Example of how to set an OpenLinkDelegate. It can also be switched out whenever.
+                // The default app id contains an edition with the title "link" that can be used
+                // to test this out.
+                editions.openLinkDelegate = object : OpenLinkDelegate {
+                    override fun onOpenAdLink(url: String): OpenLinkDelegate.Action {
+                        Log.debug { "Got URL: $url" }
+
+                        return OpenLinkDelegate.Action.InAppBrowser
+                    }
+                }
+
                 this.deferredEditions.complete(editions)
             } else {
                 this.deferredEditions.completeExceptionally(Exception("Could not create Editions"))
